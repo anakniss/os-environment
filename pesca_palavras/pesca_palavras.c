@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 char** readMatrix(FILE* file, int line_size, int column_size){
     char **matrix = malloc(line_size * sizeof(char *));
@@ -32,14 +33,27 @@ char** readMatrix(FILE* file, int line_size, int column_size){
     return matrix;
 }
 
+int saveMatrixToFile(const char **matrix, int line_size, const char *filename) {
+    FILE *out = fopen(filename, "w");
+    if (!out) {
+        printf("Erro ao criar arquivo de saída: %s\n", filename);
+        return 0; // falha
+    }
+
+    for (int i = 0; i < line_size; i++) {
+        fprintf(out, "%s\n", matrix[i]);
+    }
+
+    fclose(out);
+    return 1; // sucesso
+}
 
 int main(){
     FILE *file;
     int line_size = 0;
     int column_size = 0;
-    char word_to_find[] = "deadlock";
 
-    file = fopen("./teste.txt", "r");
+    file = fopen("./cacapalavras.txt", "r");
     
     if(file == NULL){
         printf("Error opening file!\n");
@@ -54,8 +68,8 @@ int main(){
     }
 
     // lê matriz
-    char **matriz = readMatrix(file, line_size, column_size);
-    if (!matriz) {
+    char **matrix = readMatrix(file, line_size, column_size);
+    if (!matrix) {
         fclose(file);
         return 1;
     }
@@ -63,16 +77,23 @@ int main(){
     printf("Número de linhas: %d\n", line_size);
     printf("Número de colunas: %d\n", column_size);
 
-    // imprime parte da matriz (teste)
-    for (int i = 0; i < 5; i++) {
-        printf("%s\n", matriz[i]);
+    // salva matriz em arquivo diferente
+    if (saveMatrixToFile((const char**)matrix, line_size, "result.txt")) {
+        printf("Matriz gravada em result.txt com sucesso!\n");
+    } else {
+        printf("Falha ao salvar matriz em arquivo.\n");
+    }
+
+    // imprime matriz
+    for (int i = 0; i < line_size; i++) {
+        printf("%s\n", matrix[i]);
     }
 
     // libera memória
     for (int i = 0; i < line_size; i++) {
-        free(matriz[i]);
+        free(matrix[i]);
     }
-    free(matriz);
+    free(matrix);
 
     fclose(file);
 
